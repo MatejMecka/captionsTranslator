@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Jesus if you are reading this. Forgive me for this piece of garbage. I failed you :(
+# Also thanks to the people at Hacklab Kika and one guy on stackoverflow that helped me fix it.
 
 import argparse
 import srt
