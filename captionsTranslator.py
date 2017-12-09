@@ -11,18 +11,14 @@ import sys
 
 def translate(input, output, languagef, languaget):
 	file = open(input, 'r').read()
-	fileresp = open(output,'r+')
-	allLines = fileresp.readlines()
-	fileresp.seek(0)
-	fileresp.truncate()
+	fileresp = open(output, 'w') # Use w mode instead
 	subs = list(srt.parse(file))
 	for sub in subs:
 		try:
 			linefromsub = sub.content
 			translationSentence = pydeepl.translate(linefromsub, languaget.upper(), languagef.upper())
 			print(str(sub.index) + ' ' + translationSentence)
-			for line in allLines:
-				newline = fileresp.write(translationSentence)
+			fileresp.write("%d\n%s --> %s\n%s\n\n" % (sub.index, sub.start, sub.end, translationSentence))
 		except IndexError:
 			print("Error parsing data from deepl")
 
