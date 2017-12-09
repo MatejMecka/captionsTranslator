@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 
+# Jesus if you are reading this. Forgive me for this piece of garbage. I failed you :(
+
 import argparse
 import srt
 import pydeepl
 import os
 import shutil
 import sys
+import time
+from datetime import datetime
 
 # Now this is where all the fun begins
 
@@ -18,7 +22,7 @@ def translate(input, output, languagef, languaget):
 			linefromsub = sub.content
 			translationSentence = pydeepl.translate(linefromsub, languaget.upper(), languagef.upper())
 			print(str(sub.index) + ' ' + translationSentence)
-			fileresp.write("%d\n%s --> %s\n%s\n\n" % (sub.index, sub.start, sub.end, translationSentence))
+			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start)[:-3], str(sub.end)[:-3], translationSentence))
 		except IndexError:
 			print("Error parsing data from deepl")
 
