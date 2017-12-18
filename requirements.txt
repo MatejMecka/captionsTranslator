@@ -1,2 +1,2 @@
-srt==1.5.0
+pysrt==1.1.1
 pydeepl==0.9
