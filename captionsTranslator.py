@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-
-# Jesus if you are reading this. Forgive me for this piece of garbage. I failed you :(
-# Also thanks to the people at Hacklab Kika and the people on stackoverflow that helped me fix it.
+# Thanks to the people at Hacklab Kika and the people on stackoverflow that helped me fix some of the bugs I encountered during writing this.
 
 import argparse
-import srt
 import pysrt # This is bad practice forgive me. But each has it's cases i'm using it.
 import pydeepl
 import os
@@ -13,22 +10,19 @@ import sys
 import time
 from datetime import datetime
 
-# Now this is where all the fun begins
+# Now this is where all the fun begins	
 
 def translate(input, output, languagef, languaget):
-	file = open(input, 'r').read()
-	fileresp = open(output, 'w') # Use w mode instead
-	subs = list(srt.parse(file))
-	for sub in subs:
+	subs = pysrt.open(input)
+	for index, sub in enumerate(subs):
 		try:
-			linefromsub = sub.content
-			translationSentence = pydeepl.translate(linefromsub, languaget.upper(), languagef.upper())
-			print(str(sub.index) + ' ' + translationSentence)
-			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start)[:-3], str(sub.end)[:-3], translationSentence))
+			linetotranslate = subs[index].text 
+			translated = pydeepl.translate(linetotranslate, languaget.upper(), languagef.upper())
+			subs[index] = translated
+			print(subs[index]) 
 		except IndexError:
-			print("Error parsing data from deepl")
-
-	os.remove(input)		
+			print("Error parsing data from deepl.")	
+	subs.save(output)
 
 def handleTranslations(inp,out,laf,lat):
 	subs = pysrt.open(inp)
