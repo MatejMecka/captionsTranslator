@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Jesus if you are reading this. Forgive me for this piece of garbage. I failed you :(
-# Also thanks to the people at Hacklab Kika and one guy on stackoverflow that helped me fix it.
+# Also thanks to the people at Hacklab Kika and the people on stackoverflow that helped me fix it.
 
 import argparse
 import srt
@@ -15,7 +15,7 @@ from datetime import datetime
 
 # Now this is where all the fun begins
 
-def translate(input, output, languagef, languagefnguaget):
+def translate(input, output, languagef, languaget):
 	file = open(input, 'r').read()
 	fileresp = open(output, 'w') # Use w mode instead
 	subs = list(srt.parse(file))
@@ -32,26 +32,30 @@ def translate(input, output, languagef, languagefnguaget):
 
 def handleTranslations(inp,out,laf,lat):
 	subs = pysrt.open(inp)
-	for sub in subs:
-		try:
-			# Check if it's a sentence if not check if there is another sentence there if not
-			sentence = None
-			if subs[sub.index].text.endswith('.') or subs[sub.index].text.endswith('?') or subs[sub.index].text.endswith('!'):
-				subs[sub.index].index - count
-			else:
-				subs[sub.index].text = subs[sub.index].text + '\n' + subs[sub.index+1].text
-				count+=1
-				print(count)
-				#subs[sub.index].index - count
-				subs[sub.index].end = subs[sub.index+1].end
-				del subs[sub.index+1]
-		except IndexError:		
-			pass
+	append_index = None
+	remove_list = []                # List of unwanted indexes
+	sub_index = subs[0].index       # Existing starting index
 
-	subs.save('translatedsubs.srt', encoding='utf-8')
-	translate('correcthorsebatterystaple.srt', out, laf, lat)		
+	for index, sub in enumerate(subs):
+		if append_index is not None:
+			subs[append_index].text += "\n" + sub.text
+			subs[append_index].end = sub.end
+			remove_list.append(index)
+		if sub.text[-1] not in '.?!':
+			append_index = index
+		else:
+			append_index = None
 
+	# Remove orphaned subs in reverse order        
+	for index in remove_list[::-1]:     
+		del subs[index]
 
+	# Reindex remaining subs
+	for index in range(len(subs)):
+		subs[index].index = index + sub_index
+
+	subs.save('correcthorsebatterystaple', encoding='utf-8')
+	translate('correcthorsebatterystaple.srt', out, laf, lat)
 
 
 def parsefiles(inputFile, outputFile, languageFrom, languageTo):
@@ -83,4 +87,3 @@ def main():
 
 
 main()
-
