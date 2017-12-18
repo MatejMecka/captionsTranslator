@@ -38,7 +38,7 @@ def handleTranslations(inp,out,laf,lat):
 
 	for index, sub in enumerate(subs):
 		if append_index is not None:
-			subs[append_index].text += "\n" + sub.text
+			subs[append_index].text += sub.text
 			subs[append_index].end = sub.end
 			remove_list.append(index)
 		if sub.text[-1] not in '.?!':
