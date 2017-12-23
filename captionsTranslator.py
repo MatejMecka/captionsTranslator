@@ -2,7 +2,7 @@
 # Thanks to the people at Hacklab Kika and the people on stackoverflow that helped me fix some of the bugs I encountered during writing this.
 
 import argparse
-import pysrt # This is bad practice forgive me. But each has it's cases i'm using it.
+import pysrt 
 import pydeepl
 import os
 import shutil
@@ -14,15 +14,17 @@ from datetime import datetime
 
 def translate(input, output, languagef, languaget):
 	subs = pysrt.open(input)
+	fileresp = open(output, 'w') # Use w mode instead
 	for index, sub in enumerate(subs):
 		try:
-			linetotranslate = subs[index].text 
-			translated = pydeepl.translate(linetotranslate, languaget.upper(), languagef.upper())
-			subs[index] = translated
-			print(subs[index]) 
+			linefromsub = subs[index].text
+			translationSentence = pydeepl.translate(linefromsub, languaget.upper(), languagef.upper())
+			print(str(sub.index) + ' ' + translationSentence)
+			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start)[:-3], str(sub.end)[:-3], translationSentence))
 		except IndexError:
-			print("Error parsing data from deepl.")	
-	subs.save(output)
+			print("Error parsing data from deepl")
+
+	os.remove(input) 
 
 def handleTranslations(inp,out,laf,lat):
 	subs = pysrt.open(inp)
@@ -66,7 +68,7 @@ def parsefiles(inputFile, outputFile, languageFrom, languageTo):
 	shutil.copyfile(inputFile, outputFile)
 	shutil.copyfile(inputFile, 'correcthorsebatterystaple.srt') # So I don't overwrite the original file i'll create this temp one and then delete it. 
 	# Due to a bug that files cannot be accessed I had to move everything to another function
-	handleTranslations(inputFile, outputFile, languageFrom, languageTo)
+	handleTranslations('correcthorsebatterystaple.srt', outputFile, languageFrom, languageTo)
 
 
 def main():
