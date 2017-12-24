@@ -10,6 +10,7 @@ import sys
 import time
 from datetime import datetime
 
+copyinput = 'correcthorsebatterystaple.srt'
 # Now this is where all the fun begins	
 
 def translate(input, output, languagef, languaget):
@@ -50,9 +51,8 @@ def handleTranslations(inp,out,laf,lat):
 	for index in range(len(subs)):
 		subs[index].index = index + sub_index
 
-	input = 'correcthorsebatterystaple.srt'
-	subs.save(input, encoding='utf-8')
-	translate(input, out, laf, lat)
+	subs.save(copyinput, encoding='utf-8')
+	translate(copyinput, out, laf, lat)
 
 
 def parsefiles(inputFile, outputFile, languageFrom, languageTo):
@@ -69,7 +69,7 @@ def parsefiles(inputFile, outputFile, languageFrom, languageTo):
 	shutil.copyfile(inputFile, outputFile)
 	shutil.copyfile(inputFile, 'correcthorsebatterystaple.srt') # So I don't overwrite the original file i'll create this temp one and then delete it. 
 	# Due to a bug that files cannot be accessed I had to move everything to another function
-	handleTranslations('correcthorsebatterystaple.srt', outputFile, languageFrom, languageTo)
+	handleTranslations(copyinput, outputFile, languageFrom, languageTo)
 
 
 def main():
