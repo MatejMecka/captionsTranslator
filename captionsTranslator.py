@@ -10,7 +10,7 @@ import sys
 import time
 from datetime import datetime
 
-copyinput = 'correcthorsebatterystaple.srt'
+copyinput = 'copyfromoriginal.srt'
 # Now this is where all the fun begins	
 
 def translate(input, output, languagef, languaget):
