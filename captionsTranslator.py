@@ -50,8 +50,9 @@ def handleTranslations(inp,out,laf,lat):
 	for index in range(len(subs)):
 		subs[index].index = index + sub_index
 
-	subs.save('correcthorsebatterystaple', encoding='utf-8')
-	translate('correcthorsebatterystaple.srt', out, laf, lat)
+	input = 'correcthorsebatterystaple.srt'
+	subs.save(input, encoding='utf-8')
+	translate(input, out, laf, lat)
 
 
 def parsefiles(inputFile, outputFile, languageFrom, languageTo):
