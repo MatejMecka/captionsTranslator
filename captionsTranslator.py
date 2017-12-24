@@ -9,8 +9,8 @@ import shutil
 import sys
 import time
 from datetime import datetime
+import tempfile
 
-copyinput = 'copyfromoriginal.srt'
 # Now this is where all the fun begins	
 
 def translate(input, output, languagef, languaget):
@@ -24,8 +24,7 @@ def translate(input, output, languagef, languaget):
 			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start)[:-3], str(sub.end)[:-3], translationSentence))
 		except IndexError:
 			print("Error parsing data from deepl")
-
-	os.remove(input) 
+	os.remove(input)
 
 def handleTranslations(inp,out,laf,lat):
 	subs = pysrt.open(inp)
@@ -51,8 +50,8 @@ def handleTranslations(inp,out,laf,lat):
 	for index in range(len(subs)):
 		subs[index].index = index + sub_index
 
-	subs.save(copyinput, encoding='utf-8')
-	translate(copyinput, out, laf, lat)
+	subs.save(inp, encoding='utf-8')
+	translate(inp, out, laf, lat)
 
 
 def parsefiles(inputFile, outputFile, languageFrom, languageTo):
@@ -66,10 +65,11 @@ def parsefiles(inputFile, outputFile, languageFrom, languageTo):
 	if outputFile == None:
 		outputFile = inputFile + languageTo + '.srt'
 
-	shutil.copyfile(inputFile, outputFile)
-	shutil.copyfile(inputFile, 'correcthorsebatterystaple.srt') # So I don't overwrite the original file i'll create this temp one and then delete it. 
+	tempFile = tempfile.NamedTemporaryFile(suffix='.srt',delete=False)
+	shutil.copyfile(inputFile,tempFile.name)
+	shutil.copyfile(inputFile, outputFile) 
 	# Due to a bug that files cannot be accessed I had to move everything to another function
-	handleTranslations(copyinput, outputFile, languageFrom, languageTo)
+	handleTranslations(tempFile.name, outputFile, languageFrom, languageTo)
 
 
 def main():
