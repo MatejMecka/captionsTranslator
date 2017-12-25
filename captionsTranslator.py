@@ -20,10 +20,10 @@ def translate(input, output, languagef, languaget):
 		try:
 			linefromsub = subs[index].text
 			translationSentence = pydeepl.translate(linefromsub, languaget.upper(), languagef.upper())
-			print(str(sub.index) + ' ' + translationSentence)
-			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start)[:-3], str(sub.end)[:-3], translationSentence))
-		except IndexError:
-			print("Error parsing data from deepl")
+			print(str(sub.start) + ' ' + translationSentence)
+			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start), str(sub.end), translationSentence))
+		except IndexError as e:
+			print("Error parsing data from deepl." + str(e))
 	os.remove(input)
 
 def handleTranslations(inp,out,laf,lat):
