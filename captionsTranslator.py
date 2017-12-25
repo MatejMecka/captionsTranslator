@@ -17,13 +17,19 @@ def translate(input, output, languagef, languaget):
 	subs = pysrt.open(input)
 	fileresp = open(output, 'w') # Use w mode instead
 	for index, sub in enumerate(subs):
+		linefromsub = subs[index].text
 		try:
-			linefromsub = subs[index].text
 			translationSentence = pydeepl.translate(linefromsub, languaget.upper(), languagef.upper())
 			print(str(sub.start) + ' ' + translationSentence)
 			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start), str(sub.end), translationSentence))
 		except IndexError as e:
-			print("Error parsing data from deepl." + str(e))
+			toSend = linefromsub.split('\n')
+			stringToWrite = ""
+			for part in toSend:
+				finString = stringToWrite + pydeepl.translate(part, languaget.upper(), languagef.upper()) + "\n"
+			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start), str(sub.end), translationSentence))
+
+
 	os.remove(input)
 
 def handleTranslations(inp,out,laf,lat):
