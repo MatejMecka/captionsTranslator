@@ -3,7 +3,8 @@
 
 import argparse
 import pysrt 
-import pydeepl
+#import pydeepl
+from deepl_scraper.translator import DeepLEngine
 import os
 import shutil
 import sys
@@ -14,12 +15,13 @@ import tempfile
 # Now this is where all the fun begins	
 
 def translate(input, output, languagef, languaget):
+	translator = DeepLEngine(source_language=languagef, target_language=languaget)
 	subs = pysrt.open(input)
 	fileresp = open(output, 'w') # Use w mode instead
 	for index, sub in enumerate(subs):
 		linefromsub = subs[index].text
 		try:
-			translationSentence = pydeepl.translate(linefromsub, languaget.upper(), languagef.upper())
+			translationSentence = translator.translate(linefromsub)
 			print(str(sub.start) + ' ' + translationSentence)
 			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start), str(sub.end), translationSentence))
 		except IndexError as e:
