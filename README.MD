@@ -2,7 +2,7 @@
 A script developed during Google Code In 2017 for CCExtractor Development to translate subtitle files.
 
 ### Requirements:
-* Python3 (Else the script would crash due to UTF8 errors and Python2 is going to be deprecated :) )
+* Python3 
 
 ### Installation:
 `pip install requirements.txt`
