@@ -9,16 +9,22 @@ import sys
 import time
 from datetime import datetime
 import tempfile
+import asyncio
 
 # Now this is where all the fun begins	
 
-def translate(input, output, languagef, languaget, api_key):
+async def puppeteer(string, to_lang, from_lang):
+	from deepl_scraper_pp.deepl_tr import deepl_tr
+	coros = [deepl_tr(string, to_lang=to_lang, from_lang=from_lang)]
+	res = await asyncio.gather(*coros, return_exceptions=True)
+	return res[0]
 
-	if not api_key:
-		from deepl_scraper.translator import DeepLEngine
-		translator = DeepLEngine(source_language=languagef, target_language=languaget)
-	else:
+
+def translate(input, output, languagef, languaget, api_key):
+	if api_key:
 		from deep_translator import DeepL
+	else:
+		loop = asyncio.get_event_loop()
 
 	subs = pysrt.open(input)
 	fileresp = open(output, 'w') # Use w mode instead
@@ -26,9 +32,9 @@ def translate(input, output, languagef, languaget, api_key):
 		linefromsub = subs[index].text
 		try:
 			if not api_key:
-				translationSentence = translator.translate(linefromsub)
+				translationSentence = loop.run_until_complete(puppeteer(linefromsub, languaget, languagef))
 			else:
-				translationSentence = DeepL(api_key=api_key, source=languagef.lower(), target=languaget.lower()).translate(linefromsub)
+				translationSentence = DeepL(api_key=api_key, source=languagef.lower(), use_free_api=True, target=languaget.lower()).translate(linefromsub)
 			print(str(sub.start) + ' ' + translationSentence)
 			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start), str(sub.end), translationSentence))
 		except IndexError as e:
@@ -36,7 +42,7 @@ def translate(input, output, languagef, languaget, api_key):
 			stringToWrite = ""
 			for part in toSend:
 				if not api_key:
-					finString = stringToWrite + translator.translate(linefromsub)
+					finString = stringToWrite + loop.run_until_complete(puppeteer(linefromsub, languaget, languagef))
 				else:
 					finString = stringToWrite + DeepL(api_key=api_key, source=languagef.lower(), target=languaget.lower()).translate(linefromsub)
 			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start), str(sub.end), translationSentence))
