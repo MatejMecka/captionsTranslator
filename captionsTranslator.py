@@ -13,69 +13,63 @@ import asyncio
 
 # Now this is where all the fun begins	
 
-async def puppeteer(string, to_lang, from_lang):
+async def puppeteer(elements, to_lang, from_lang):
 	from deepl_scraper_pp.deepl_tr import deepl_tr
-	coros = [deepl_tr(string, to_lang=to_lang, from_lang=from_lang)]
-	res = await asyncio.gather(*coros, return_exceptions=True)
-	return res[0]
-
+	coros = [await deepl_tr(elem['text'], to_lang=to_lang, from_lang=from_lang) for elem in elements ]
+	return coros
 
 def translate(input, output, languagef, languaget, api_key):
+	"""
+	Translate each subtitle block
+	"""
+
 	if api_key:
+		print("Using Deepl's API. Should be faster.")
 		from deep_translator import DeepL
 	else:
+		print('Scraping Deepl, this may take some time....')
 		loop = asyncio.get_event_loop()
 
 	subs = pysrt.open(input)
-	fileresp = open(output, 'w') # Use w mode instead
+	elements = []
+	elements_translated = []
 	for index, sub in enumerate(subs):
-		linefromsub = subs[index].text
+		entry = {'index': sub.index, 'start_time': sub.start, 'end_time': sub.end, 'text': sub.text}
+		elements.append(entry)
+		elements_translated.append(entry)
+
+	counter = 20
+	second_counter = 0
+	while elements != []:
 		try:
 			if not api_key:
-				translationSentence = loop.run_until_complete(puppeteer(linefromsub, languaget, languagef))
+				translatedSentences = loop.run_until_complete(asyncio.gather(puppeteer(elements[:counter], languaget, languagef), return_exceptions=True))
+				translatedSentences = translatedSentences[0]
 			else:
-				translationSentence = DeepL(api_key=api_key, source=languagef.lower(), use_free_api=True, target=languaget.lower()).translate(linefromsub)
-			print(str(sub.start) + ' ' + translationSentence)
-			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start), str(sub.end), translationSentence))
-		except IndexError as e:
-			toSend = linefromsub.split('\n')
-			stringToWrite = ""
-			for part in toSend:
-				if not api_key:
-					finString = stringToWrite + loop.run_until_complete(puppeteer(linefromsub, languaget, languagef))
-				else:
-					finString = stringToWrite + DeepL(api_key=api_key, source=languagef.lower(), target=languaget.lower()).translate(linefromsub)
-			fileresp.write("{}\n{} --> {}\n{}\n\n".format(sub.index,str(sub.start), str(sub.end), translationSentence))
+				translatedSentences = Deepl(api_key, source=languagef, target=languaget).translate_batch(elements[:counter])
+		except:
+			translatedSentences = [None for elem in range(counter)]
 
-	os.remove(input)
+		for sentence in translatedSentences:
+			try:
+				elements_translated[second_counter]['text'] = sentence
+				print(f"{elements_translated[second_counter]['index']}. -> {elements_translated[second_counter]['text']}")
+				second_counter+=1
+			except:
+				pass
 
-def handleTranslations(inp,out,laf,lat, api_key):
-	subs = pysrt.open(inp)
-	append_index = None
-	remove_list = []                # List of unwanted indexes
-	sub_index = subs[0].index       # Existing starting index
+		del elements[:counter]
 
-	for index, sub in enumerate(subs):
-		if append_index is not None:
-			subs[append_index].text += sub.text
-			subs[append_index].end = sub.end
-			remove_list.append(index)
-		if sub.text[-1] not in '.?!':
-			append_index = index
-		else:
-			append_index = None
+	print(elements)
+	with open(output, 'w') as fileresp: # Use w mode instead
+		for element in elements_translated:
+			try:
+				print(f"{element['start_time']}  {element['text']}")
+				fileresp.write(f"{element['index']}\n{element['start_time']} --> {element['end_time']}\n{element['text']}\n\n")
+			except:
+				pass
 
-	# Remove orphaned subs in reverse order        
-	for index in remove_list[::-1]:     
-		del subs[index]
-
-	# Reindex remaining subs
-	for index in range(len(subs)):
-		subs[index].index = index + sub_index
-
-	subs.save(inp, encoding='utf-8')
-	translate(inp, out, laf, lat, api_key)
-
+		fileresp.close()
 
 def parsefiles(inputFile, outputFile, languageFrom, languageTo, api_key):
 	if inputFile == None:
@@ -88,12 +82,11 @@ def parsefiles(inputFile, outputFile, languageFrom, languageTo, api_key):
 	if outputFile == None:
 		outputFile = inputFile + languageTo + '.srt'
 
-
 	tempFile = tempfile.NamedTemporaryFile(suffix='.srt',delete=False)
 	shutil.copyfile(inputFile,tempFile.name)
 	shutil.copyfile(inputFile, outputFile) 
 	# Due to a bug that files cannot be accessed I had to move everything to another function
-	handleTranslations(tempFile.name, outputFile, languageFrom, languageTo, api_key)
+	translate(inputFile, outputFile, languageFrom, languageTo, api_key)
 
 def main():
 	# Parse Arguments
@@ -106,5 +99,5 @@ def main():
 	args = parser.parse_args()
 	parsefiles(args.input_file, args.output_file, args.language_from, args.language_to, args.api_key)
 
-
-main()
+if __name__ == '__main__':
+	main()
