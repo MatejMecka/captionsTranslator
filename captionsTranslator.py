@@ -41,24 +41,26 @@ def translate(input, output, languagef, languaget, api_key):
 	counter = 20
 	second_counter = 0
 	while elements != []:
-		try:
-			if not api_key:
-				translatedSentences = loop.run_until_complete(asyncio.gather(puppeteer(elements[:counter], languaget, languagef), return_exceptions=True))
-				translatedSentences = translatedSentences[0]
-			else:
-				translatedSentences = Deepl(api_key, source=languagef, target=languaget).translate_batch(elements[:counter])
-		except:
-			translatedSentences = [None for elem in range(counter)]
-
-		for sentence in translatedSentences:
+		while True:
 			try:
-				elements_translated[second_counter]['text'] = sentence
-				print(f"{elements_translated[second_counter]['index']}. -> {elements_translated[second_counter]['text']}")
-				second_counter+=1
+				if not api_key:
+					translatedSentences = loop.run_until_complete(asyncio.gather(puppeteer(elements[:counter], languaget, languagef), return_exceptions=True))
+					translatedSentences = translatedSentences[0]
+				else:
+					translatedSentences = Deepl(api_key, source=languagef, target=languaget).translate_batch(elements[:counter])
 			except:
-				pass
+				translatedSentences = [None for elem in range(counter)]
 
-		del elements[:counter]
+			for sentence in translatedSentences:
+				try:
+					elements_translated[second_counter]['text'] = sentence
+					print(f"{elements_translated[second_counter]['index']}. -> {elements_translated[second_counter]['text']}")
+					second_counter+=1
+				except:
+					pass
+
+			del elements[:counter]
+			break
 
 	print(elements)
 	with open(output, 'w') as fileresp: # Use w mode instead
