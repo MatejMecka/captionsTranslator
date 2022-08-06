@@ -5,7 +5,7 @@ A script developed during Google Code In 2017 for CCExtractor Development to tra
 * Python3 
 
 ### Installation:
-`pip install requirements.txt`
+`pip install -r requirements.txt`
 
 ### Getting Started:
 * Run the Script
