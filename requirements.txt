@@ -1,4 +1,4 @@
 pysrt==1.1.1
 deep-translator==1.4.4
 #deepl-scraper-pp==0.1.2
-git+git://github.com/matejmecka/deepl-scraper-pyppeteer@patch-1#egg=deepl-scraper-pp
+git+https://github.com/matejmecka/deepl-scraper-pyppeteer@patch-1#egg=deepl-scraper-pp
